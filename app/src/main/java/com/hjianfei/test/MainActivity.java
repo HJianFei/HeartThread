@@ -10,9 +10,7 @@ import android.widget.EditText;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.DatagramSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,7 +21,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Socket socket = null;
     private OutputStream os;
     private InputStream is;
-    private DatagramSocket datagramSocket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,14 +32,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_send.setOnClickListener(this);
         btn_connect.setOnClickListener(this);
         try {
-            datagramSocket = new DatagramSocket(8989);
-        } catch (SocketException e) {
-            e.printStackTrace();
-        }
-        new HeartThreadSend(datagramSocket).start();
-        try {
-            new HeartThreadReceive(datagramSocket).start();
-        } catch (SocketException e) {
+            new HeartThread("192.168.1.60", 8989).start();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
