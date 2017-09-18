@@ -38,6 +38,10 @@ public class HeartThread {
     private DatagramPacket datagramPacket = null;
     private byte[] buffer = new byte[]{1, 2, 3, 4, 5};
 
+    /**
+     * @param ip_address IP地址
+     * @param port       端口
+     */
     public HeartThread(String ip_address, int port) {
         this.ip_address = ip_address;
         this.port = port;
@@ -109,17 +113,20 @@ public class HeartThread {
         public void run() {
             while (running && run) {
                 if (System.currentTimeMillis() - lastReceiveTime > receiveTimeDelay) {//超时没有收到回复,断开重连
-                    overThis();
+                    //心跳响应超时，断开TCP重新连接
+                    recConnect();
                 } else {
                     try {
                         pack = new DatagramPacket(buff, buff.length);
                         datagramSocket.receive(pack);
                         byte[] res = Arrays.copyOf(buff, pack.getLength());
-                        System.out.println("收到心跳包：" + Arrays.toString(res));
+                        Log.d("onResponse", "收到心跳包：" + Arrays.toString(res));
+                        //修改最后一次发送的时间
                         lastReceiveTime = System.currentTimeMillis();
                     } catch (Exception e) {
                         e.printStackTrace();
-                        overThis();
+                        //心跳响应超时，断开TCP重新连接
+                        recConnect();
                     }
                 }
             }
@@ -128,7 +135,10 @@ public class HeartThread {
         }
     }
 
-    private void overThis() {
+    /**
+     * 心跳响应超时，断开TCP重新连接
+     */
+    private void recConnect() {
         running = false;
         Log.d("onResponse", "接收超时");
 
